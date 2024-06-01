@@ -1,0 +1,184 @@
+{% load static %}
+{% get_media_prefix as MEDIA_PREFIX %}
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>Watermark</title>
+    <style>
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            /* Mencegah blur yang terlalu besar */
+        }
+
+        .container::before {
+            content: "";
+            background: inherit;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            backdrop-filter: blur(8px);
+            /* Efek blur */
+            z-index: -1;
+        }
+
+        body {
+            text-align: center;
+            padding: 20px;
+            background-color: rgb(233, 233, 233);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+
+        .btn {
+            margin: 10px;
+        }
+
+        img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        h5 {
+            margin-top: 20px;
+        }
+
+        .table td {
+            vertical-align: top;
+            padding: 15px;
+        }
+
+        .table img {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        @media (min-width: 576px) {
+            img {
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="container">
+        <h1 class="my-4">Watermarking DCT & HWT</h1>
+        <form method="post" enctype="multipart/form-data" class="mb-4">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">Upload</button>
+        </form>
+        <form id="hapusForm" action="{% url 'hapus' %}" method="post" class="mb-4">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success" onclick="return confirm('Apakah Anda yakin ingin reset?');">Reset/Hapus</button>
+        </form>
+
+        <hr>
+
+        <div>
+            <!-- <button class="btn btn-secondary" onclick="showProcessed()">Proses</button> -->
+            <button class="btn btn-secondary" onclick="embedWatermark()">Masukan Watermark</button>
+            <button class="btn btn-secondary" onclick="recover()">Keluarkan Watermark</button>
+        </div>
+
+        {% if success == True %}
+        <div class="table-responsive mt-4">
+            <table class="table table-bordered">
+                <tr>
+                    <td>
+                        <div>
+                            <h5>Foto Gambar dan Watermark</h5>
+                            <img src="{{ MEDIA_PREFIX }}input/1.jpg" class="img-fluid">
+                            <img src="{{ MEDIA_PREFIX }}input/2.png" class="img-fluid">
+                        </div>
+                    </td>
+                    <td>
+                        <div id="processed" style="display: none;">
+                            <h5>Proses Gambar and Watermark</h5>
+                            <img src="{{ MEDIA_PREFIX }}processedInputImage/1.jpg">
+                            <img src="{{ MEDIA_PREFIX }}processedInputImage/2.png">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div id="embedded" style="display: none;">
+                            <h5>Watermarked</h5>
+                            <img src="{{ MEDIA_PREFIX }}result/WatermarkedImage.jpg">
+                        </div>
+                        <div id="recovered" style="display: none;">
+                            <h5>Watermark</h5>
+                            <img src="{{ MEDIA_PREFIX }}result/recoveredWatermark.jpg">
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function showProcessed() {
+            document.getElementById("processed").style.display = "block";
+        }
+
+        function embedWatermark() {
+            document.getElementById("embedded").style.display = "block";
+        }
+
+        function recover() {
+            document.getElementById("recovered").style.display = "block";
+        }
+    </script>
+    <script>
+        // Fungsi untuk mengembalikan ke halaman index.html setelah alert ditutup
+        function kembaliKeIndex() {
+            window.location.href = "{% url 'index' %}";
+        }
+        
+        // Menambahkan event listener untuk menangani event ketika tombol HAPUS ditekan
+        document.getElementById('hapusForm').addEventListener('submit', function() {
+            setTimeout(function() {
+                // Menampilkan alert
+                alert('Foto berhasil dihapus');
+                // Kembali ke halaman index.html setelah alert ditutup
+                kembaliKeIndex();
+            }, 100);
+        });
+    </script>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
